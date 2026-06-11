@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import app from"./app.js"
 
-import {sequelize, User }from "./models/index.js"
+import sequelize from "./config/databaser.js"
 
 const port = process.env.PORT || 3000;
 try{
