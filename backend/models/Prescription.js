@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/databaser.js";
 
-const Category = sequelize.define(
-  "Category",
+const Prescription = sequelize.define(
+  "Prescription",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -10,21 +10,29 @@ const Category = sequelize.define(
       autoIncrement: true,
     },
 
-    nombre: {
+    paciente: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
 
-    descripcion: {
+    medico: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+
+    fecha: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+
+    observacion: {
       type: DataTypes.TEXT,
-      allowNull: true,
     },
   },
   {
-    tableName: "categories",
+    tableName: "prescriptions",
     timestamps: true,
   }
 );
 
-export default Category;
+export default Prescription;
