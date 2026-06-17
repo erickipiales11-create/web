@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+import sequelize from '../config/databaser.js';
 
 const Usuario = sequelize.define('Usuario', {
   id: {
@@ -37,9 +37,9 @@ const Usuario = sequelize.define('Usuario', {
     }
   },
   rol: {
-    type: DataTypes.ENUM('usuario', 'farmacia', 'administrador'),
-    defaultValue: 'usuario'
-  },
+  type: DataTypes.ENUM('usuario', 'farmacia', 'administrador', 'medico'),
+  defaultValue: 'usuario'
+},
   telefono: {
     type: DataTypes.STRING(20),
     allowNull: true

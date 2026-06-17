@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
-import Usuario from './Usuario.js';
+import sequelize from '../config/databaser.js';
 
 const Farmacia = sequelize.define('Farmacia', {
   id: {
@@ -10,11 +9,7 @@ const Farmacia = sequelize.define('Farmacia', {
   },
   usuario_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'usuarios',
-      key: 'id'
-    }
+    allowNull: false
   },
   nombre_farmacia: {
     type: DataTypes.STRING(255),
@@ -92,9 +87,5 @@ const Farmacia = sequelize.define('Farmacia', {
   tableName: 'farmacias',
   timestamps: true
 });
-
-// Relaciones
-Farmacia.belongsTo(Usuario, { foreignKey: 'usuario_id' });
-Usuario.hasOne(Farmacia, { foreignKey: 'usuario_id' });
 
 export default Farmacia;
