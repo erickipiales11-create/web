@@ -1,10 +1,20 @@
 import express from "express";
-
-import { login, register } from "../controllers/authController.js";
+import { 
+  registrar, 
+  registrarFarmacia, 
+  login, 
+  obtenerPerfil 
+} from "../controllers/authController.js";
+import { autenticar } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-router.post("/register", register);
+// Rutas públicas
+router.post("/registrar", registrar);
+router.post("/registrar-farmacia", registrarFarmacia);
 router.post("/login", login);
+
+// Rutas protegidas
+router.get("/perfil", autenticar, obtenerPerfil);
 
 export default router;

@@ -1,30 +1,17 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../config/databaser.js";
+import { Sequelize } from "sequelize";
+import dotenv from "dotenv"
 
-const Category = sequelize.define(
-  "Category",
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
+dotenv.config();
 
-    nombre: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-
-    descripcion: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-  },
-  {
-    tableName: "categories",
-    timestamps: true,
-  }
-);
-
-export default Category;
+const sequelize =new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT,
+        dialect: "postgres",
+        logging: false
+    }
+)
+export default sequelize;
