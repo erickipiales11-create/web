@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS prescriptions (
+    id SERIAL PRIMARY KEY,
+
+    paciente VARCHAR(255) NOT NULL,
+
+    medico VARCHAR(255) NOT NULL,
+
+    fecha DATE NOT NULL,
+
+    observacion TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
