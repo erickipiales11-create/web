@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+import sequelize from '../config/databaser.js';
 
 const Category = sequelize.define(
   'Category',
@@ -9,16 +9,19 @@ const Category = sequelize.define(
       primaryKey: true,
       autoIncrement: true
     },
-
     nombre: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true
     },
-
     descripcion: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
     }
   },
   {

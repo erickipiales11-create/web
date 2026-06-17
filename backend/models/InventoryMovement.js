@@ -1,37 +1,42 @@
-import { DataTypes } from "sequelize";
-import sequelize from "../config/databaser.js";
+import { DataTypes } from 'sequelize';
+import sequelize from '../config/databaser.js';
 
 const InventoryMovement = sequelize.define(
-  "InventoryMovement",
+  'InventoryMovement',
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true,
+      autoIncrement: true
     },
-
     medicine_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
-
+    prescription_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     tipo: {
-      type: DataTypes.ENUM("entrada", "salida"),
-      allowNull: false,
+      type: DataTypes.ENUM('entrada', 'salida'),
+      allowNull: false
     },
-
     cantidad: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
-
     observacion: {
-      type: DataTypes.TEXT,
+      type: DataTypes.TEXT
     },
+    activo: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true
+    }
   },
   {
-    tableName: "inventory_movements",
-    timestamps: true,
+    tableName: 'inventory_movements',
+    timestamps: true
   }
 );
 

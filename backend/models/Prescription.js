@@ -10,13 +10,13 @@ const Prescription = sequelize.define(
       autoIncrement: true,
     },
 
-    paciente: {
-      type: DataTypes.STRING,
+    paciente_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
 
-    medico: {
-      type: DataTypes.STRING,
+    medico_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
 

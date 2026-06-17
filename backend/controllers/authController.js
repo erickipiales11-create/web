@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import Usuario from '../models/Usuario.js';
-import Farmacia from '../models/Farmacia.js';
+import Usuario from '../models/User.js';
+import Farmacia from '../models/Pharmacy.js';
 
 // Registrar usuario normal
 export const registrar = async (req, res) => {

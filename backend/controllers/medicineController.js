@@ -1,5 +1,6 @@
-import Medicamento from '../models/Medicamento.js';
-import Farmacia from '../models/Farmacia.js';
+import Medicamento from '../models/Medicine.js';
+import Farmacia from '../models/Pharmacy.js';
+import sequelize from '../config/databaser.js';
 import { Op } from 'sequelize';
 
 // Crear medicamento (solo farmacia)

@@ -1,5 +1,5 @@
-import Farmacia from '../models/Farmacia.js';
-import Usuario from '../models/Usuario.js';
+import Farmacia from '../models/Pharmacy.js';
+import Usuario from '../models/User.js';
 import { Op } from 'sequelize';
 
 // Obtener todas las farmacias (público)
@@ -28,7 +28,15 @@ export const obtenerTodasFarmacias = async (req, res) => {
 // Obtener una farmacia por ID
 export const obtenerFarmaciaPorId = async (req, res) => {
   try {
-    const farmacia = await Farmacia.findByPk(req.params.id, {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({
+        mensaje: 'ID inválido',
+        error: 'INVALID_ID'
+      });
+    }
+
+    const farmacia = await Farmacia.findByPk(id, {
       include: [{
         model: Usuario,
         attributes: ['id', 'nombre', 'email', 'telefono']
@@ -127,6 +135,14 @@ export const obtenerFarmaciasPorCiudad = async (req, res) => {
 export const buscarFarmacias = async (req, res) => {
   try {
     const { query } = req.query;
+
+    if (!query) {
+      return res.status(400).json({
+        mensaje: 'Se requiere un término de búsqueda',
+        error: 'SEARCH_QUERY_REQUIRED'
+      });
+    }
+
     const farmacias = await Farmacia.findAll({
       where: {
         [Op.or]: [
