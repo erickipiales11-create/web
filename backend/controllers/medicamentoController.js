@@ -282,7 +282,7 @@ export const actualizarStock = async (req, res) => {
     await medicamento.update({ cantidad });
     
     // Verificar si está por debajo del stock mínimo
-    const alertaStock = medicamento.cantidad <= medicamento.stock_minimo;
+    const alertaStock = cantidad <= medicamento.stock_minimo;
     
     res.json({ 
       mensaje: '✅ Stock actualizado exitosamente',
