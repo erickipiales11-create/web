@@ -1,5 +1,5 @@
 import Prescription from '../models/Prescription.js';
-import Usuario from '../models/User.js';
+import Usuario from '../models/Usuario.js';
 
 // GET /prescripciones
 export const obtenerPrescripciones = async (req, res) => {

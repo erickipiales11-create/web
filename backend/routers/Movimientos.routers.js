@@ -6,8 +6,7 @@ import {
   crearMovimiento,
   actualizarMovimiento,
   anularMovimiento
-} from '../controllers/MovimientoController.js';
-
+} from '../controllers/Movimientocontroller.js';
 const router = Router();
 
 router.get('/',       autenticar, autorizar('farmacia', 'administrador'), obtenerMovimientos);

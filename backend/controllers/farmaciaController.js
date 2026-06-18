@@ -1,5 +1,5 @@
-import Farmacia from '../models/Pharmacy.js';
-import Usuario from '../models/User.js';
+import Farmacia from '../models/Farmacia.js';
+import Usuario from '../models/Usuario.js';
 import { Op } from 'sequelize';
 
 // Obtener todas las farmacias (público)
