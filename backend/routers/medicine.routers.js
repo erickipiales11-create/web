@@ -9,7 +9,7 @@ import {
   actualizarStock,
   obtenerMedicamentosPorVencer,
   obtenerMedicamentosBajoStock
-} from '../controllers/medicamentoController.js';
+} from '../controllers/medicineController.js';
 import { autenticar, autorizar } from '../middlewares/auth.js';
 
 const router = express.Router();
