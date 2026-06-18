@@ -5,7 +5,7 @@ import {
   actualizarFarmacia,
   obtenerFarmaciasPorCiudad,
   buscarFarmacias
-} from '../controllers/farmaciaController.js';
+} from '../controllers/pharmacyController.js';
 import { autenticar, autorizar } from '../middlewares/auth.js';
 
 const router = express.Router();

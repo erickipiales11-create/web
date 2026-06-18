@@ -1,12 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sequelize } from './config/database.js';
+import sequelize from './config/databaser.js';
 
 // Importar rutas
 import authRoutes from './routers/auth.routers.js';
-import farmaciaRoutes from './routers/farmacia.routers.js';
-import medicamentoRoutes from './routers/medicamento.routers.js';
+import farmaciaRoutes from './routers/pharmacy.routers.js';
+import medicamentoRoutes from './routers/medicine.routers.js';
+import categoriasRoutes from './routers/categorias.routers.js';
+import movimientosRoutes from './routers/Movimientos.routers.js';
+import prescripcionesRoutes from './routers/Prescripciones.routers.js';
 
 dotenv.config();
 
@@ -17,16 +20,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ============================================
-// RUTAS
-// ============================================
+// Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/farmacias', farmaciaRoutes);
 app.use('/api/medicamentos', medicamentoRoutes);
+app.use('/api/categorias', categoriasRoutes);
+app.use('/api/movimientos', movimientosRoutes);
+app.use('/api/prescripciones', prescripcionesRoutes);
 
-// ============================================
-// RUTA DE PRUEBA
-// ============================================
+// Ruta de prueba
 app.get('/', (req, res) => {
   res.json({ 
     mensaje: '🏥 API del Sistema Clínico funcionando 🚀',
@@ -34,14 +36,15 @@ app.get('/', (req, res) => {
     endpoints: {
       auth: '/api/auth',
       farmacias: '/api/farmacias',
-      medicamentos: '/api/medicamentos'
+      medicamentos: '/api/medicamentos',
+      categorias: '/api/categorias',
+      movimientos: '/api/movimientos',
+      prescripciones: '/api/prescripciones'
     }
   });
 });
 
-// ============================================
-// MANEJO DE ERRORES 404
-// ============================================
+// 404
 app.use((req, res) => {
   res.status(404).json({ 
     mensaje: 'Ruta no encontrada',
@@ -49,15 +52,11 @@ app.use((req, res) => {
   });
 });
 
-// ============================================
-// SINCRONIZAR MODELOS
-// ============================================
+// Conectar DB
 const sincronizarBaseDatos = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ Conexión a la base de datos establecida');
-    
-    // Sincronizar modelos (sin forzar)
     await sequelize.sync({ alter: false });
     console.log('✅ Modelos sincronizados correctamente');
   } catch (error) {
