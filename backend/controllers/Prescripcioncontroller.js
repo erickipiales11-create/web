@@ -1,5 +1,7 @@
 import Prescription from '../models/Prescription.js';
 import Usuario from '../models/Usuario.js';
+import InventoryMovement from '../models/InventoryMovement.js';
+import Medicamento from '../models/Medicamento.js';
 
 // GET /prescripciones
 export const obtenerPrescripciones = async (req, res) => {
@@ -17,7 +19,16 @@ export const obtenerPrescripciones = async (req, res) => {
       where: whereClause,
       include: [
         { model: Usuario, as: 'paciente', attributes: ['id', 'nombre', 'email'] },
-        { model: Usuario, as: 'medico', attributes: ['id', 'nombre', 'email'] }
+        { model: Usuario, as: 'medico', attributes: ['id', 'nombre', 'email'] },
+        {
+          model: InventoryMovement,
+          where: { tipo: 'salida' },
+          required: false,
+          attributes: ['id', 'cantidad'],
+          include: [
+            { model: Medicamento, attributes: ['id', 'nombre', 'nombre_generico', 'dosis', 'presentacion'] }
+          ]
+        }
       ],
       order: [['createdAt', 'DESC']]
     });
@@ -36,7 +47,16 @@ export const obtenerPrescripcionPorId = async (req, res) => {
     const prescripcion = await Prescription.findByPk(req.params.id, {
       include: [
         { model: Usuario, as: 'paciente', attributes: ['id', 'nombre', 'email'] },
-        { model: Usuario, as: 'medico', attributes: ['id', 'nombre', 'email'] }
+        { model: Usuario, as: 'medico', attributes: ['id', 'nombre', 'email'] },
+        {
+          model: InventoryMovement,
+          where: { tipo: 'salida' },
+          required: false,
+          attributes: ['id', 'cantidad'],
+          include: [
+            { model: Medicamento, attributes: ['id', 'nombre', 'nombre_generico', 'dosis', 'presentacion'] }
+          ]
+        }
       ]
     });
 
