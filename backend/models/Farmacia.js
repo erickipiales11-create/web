@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/databaser.js';
+import { sequelize } from '../config/database.js';
+import Usuario from './Usuario.js';
 
 const Farmacia = sequelize.define('Farmacia', {
   id: {
@@ -9,49 +10,35 @@ const Farmacia = sequelize.define('Farmacia', {
   },
   usuario_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    references: {
+      model: 'usuarios',
+      key: 'id'
+    }
   },
   nombre_farmacia: {
     type: DataTypes.STRING(255),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'El nombre de la farmacia es obligatorio' }
-    }
+    allowNull: false
   },
   direccion: {
     type: DataTypes.STRING(255),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'La dirección es obligatoria' }
-    }
+    allowNull: false
   },
   ciudad: {
     type: DataTypes.STRING(100),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'La ciudad es obligatoria' }
-    }
+    allowNull: false
   },
   estado: {
     type: DataTypes.STRING(100),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'El estado es obligatorio' }
-    }
+    allowNull: false
   },
   telefono: {
     type: DataTypes.STRING(20),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'El teléfono es obligatorio' }
-    }
+    allowNull: false
   },
   email: {
     type: DataTypes.STRING(255),
-    allowNull: true,
-    validate: {
-      isEmail: { msg: 'Email inválido' }
-    }
+    allowNull: true
   },
   sitio_web: {
     type: DataTypes.STRING(255),
@@ -60,12 +47,7 @@ const Farmacia = sequelize.define('Farmacia', {
   numero_licencia: {
     type: DataTypes.STRING(100),
     allowNull: false,
-    unique: {
-      msg: 'El número de licencia ya está registrado'
-    },
-    validate: {
-      notEmpty: { msg: 'El número de licencia es obligatorio' }
-    }
+    unique: true
   },
   horario: {
     type: DataTypes.TEXT,
@@ -87,5 +69,8 @@ const Farmacia = sequelize.define('Farmacia', {
   tableName: 'farmacias',
   timestamps: true
 });
+
+Farmacia.belongsTo(Usuario, { foreignKey: 'usuario_id' });
+Usuario.hasOne(Farmacia, { foreignKey: 'usuario_id' });
 
 export default Farmacia;

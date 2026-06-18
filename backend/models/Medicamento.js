@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/databaser.js';
+import { sequelize } from '../config/database.js';
+import Farmacia from './Farmacia.js';
 
 const Medicamento = sequelize.define('Medicamento', {
   id: {
@@ -9,18 +10,15 @@ const Medicamento = sequelize.define('Medicamento', {
   },
   farmacia_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  category_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true
+    allowNull: false,
+    references: {
+      model: 'farmacias',
+      key: 'id'
+    }
   },
   nombre: {
     type: DataTypes.STRING(255),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'El nombre del medicamento es obligatorio' }
-    }
+    allowNull: false
   },
   nombre_generico: {
     type: DataTypes.STRING(255),
@@ -33,13 +31,7 @@ const Medicamento = sequelize.define('Medicamento', {
   cantidad: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 0,
-    validate: {
-      min: {
-        args: [0],
-        msg: 'La cantidad no puede ser negativa'
-      }
-    }
+    defaultValue: 0
   },
   unidad: {
     type: DataTypes.STRING(50),
@@ -47,46 +39,23 @@ const Medicamento = sequelize.define('Medicamento', {
   },
   precio: {
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: false,
-    validate: {
-      min: {
-        args: [0],
-        msg: 'El precio no puede ser negativo'
-      },
-      notEmpty: { msg: 'El precio es obligatorio' }
-    }
+    allowNull: false
   },
   precio_compra: {
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: true,
-    validate: {
-      min: {
-        args: [0],
-        msg: 'El precio de compra no puede ser negativo'
-      }
-    }
+    allowNull: true
   },
   numero_lote: {
     type: DataTypes.STRING(100),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'El número de lote es obligatorio' }
-    }
+    allowNull: false
   },
   fecha_caducidad: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
-    validate: {
-      isDate: { msg: 'Fecha inválida' },
-      notEmpty: { msg: 'La fecha de caducidad es obligatoria' }
-    }
+    allowNull: false
   },
   fecha_fabricacion: {
     type: DataTypes.DATEONLY,
-    allowNull: true,
-    validate: {
-      isDate: { msg: 'Fecha inválida' }
-    }
+    allowNull: true
   },
   categoria: {
     type: DataTypes.STRING(100),
@@ -131,9 +100,7 @@ const Medicamento = sequelize.define('Medicamento', {
   codigo_barras: {
     type: DataTypes.STRING(100),
     allowNull: true,
-    unique: {
-      msg: 'El código de barras ya está registrado'
-    }
+    unique: true
   },
   url_imagen: {
     type: DataTypes.STRING(500),
@@ -143,5 +110,8 @@ const Medicamento = sequelize.define('Medicamento', {
   tableName: 'medicamentos',
   timestamps: true
 });
+
+Medicamento.belongsTo(Farmacia, { foreignKey: 'farmacia_id' });
+Farmacia.hasMany(Medicamento, { foreignKey: 'farmacia_id' });
 
 export default Medicamento;

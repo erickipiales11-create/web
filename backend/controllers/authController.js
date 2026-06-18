@@ -1,28 +1,15 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import Usuario from '../models/User.js';
-import Farmacia from '../models/Pharmacy.js';
+import Usuario from '../models/Usuario.js';
+import Farmacia from '../models/Farmacia.js';
 
-// Registrar usuario normal
 export const registrar = async (req, res) => {
   try {
     const { nombre, email, password, telefono } = req.body;
 
-    // Verificar campos obligatorios
-    if (!nombre || !email || !password) {
-      return res.status(400).json({ 
-        mensaje: 'Faltan campos obligatorios',
-        error: 'VALIDATION_MISSING_FIELDS'
-      });
-    }
-
-    // Verificar si ya existe
     const usuarioExistente = await Usuario.findOne({ where: { email } });
     if (usuarioExistente) {
-      return res.status(400).json({ 
-        mensaje: 'El email ya está registrado',
-        error: 'REGISTER_EMAIL_EXISTS'
-      });
+      return res.status(400).json({ mensaje: 'El email ya está registrado' });
     }
 
     const passwordHasheada = await bcrypt.hash(password, 10);
@@ -31,11 +18,10 @@ export const registrar = async (req, res) => {
       nombre,
       email,
       password: passwordHasheada,
-      telefono: telefono || null,
+      telefono,
       rol: 'usuario'
     });
 
-    // Generar token
     const token = jwt.sign(
       { id: usuario.id, email: usuario.email, rol: usuario.rol },
       process.env.JWT_SECRET,
@@ -49,19 +35,14 @@ export const registrar = async (req, res) => {
         id: usuario.id,
         nombre: usuario.nombre,
         email: usuario.email,
-        rol: usuario.rol,
-        telefono: usuario.telefono
+        rol: usuario.rol
       }
     });
   } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al registrar usuario',
-      error: error.message 
-    });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Registrar farmacia
 export const registrarFarmacia = async (req, res) => {
   try {
     const {
@@ -82,40 +63,21 @@ export const registrarFarmacia = async (req, res) => {
       longitud
     } = req.body;
 
-    // Validar campos obligatorios
-    if (!nombre || !email || !password || !nombre_farmacia || 
-        !direccion || !ciudad || !estado || !telefono_farmacia || 
-        !numero_licencia) {
-      return res.status(400).json({ 
-        mensaje: 'Faltan campos obligatorios',
-        error: 'VALIDATION_MISSING_FIELDS',
-        campos_requeridos: ['nombre', 'email', 'password', 'nombre_farmacia', 
-                           'direccion', 'ciudad', 'estado', 'telefono_farmacia', 
-                           'numero_licencia']
-      });
-    }
-
-    // Verificar si ya existe
     const usuarioExistente = await Usuario.findOne({ where: { email } });
     if (usuarioExistente) {
-      return res.status(400).json({ 
-        mensaje: 'El email ya está registrado',
-        error: 'REGISTER_EMAIL_EXISTS'
-      });
+      return res.status(400).json({ mensaje: 'El email ya está registrado' });
     }
 
     const passwordHasheada = await bcrypt.hash(password, 10);
     
-    // Crear usuario
     const usuario = await Usuario.create({
       nombre,
       email,
       password: passwordHasheada,
-      telefono: telefono || null,
+      telefono,
       rol: 'farmacia'
     });
 
-    // Crear farmacia
     const farmacia = await Farmacia.create({
       usuario_id: usuario.id,
       nombre_farmacia,
@@ -124,14 +86,13 @@ export const registrarFarmacia = async (req, res) => {
       estado,
       telefono: telefono_farmacia,
       email: email_farmacia || email,
-      sitio_web: sitio_web || null,
+      sitio_web,
       numero_licencia,
-      horario: horario || null,
-      latitud: latitud || null,
-      longitud: longitud || null
+      horario,
+      latitud,
+      longitud
     });
 
-    // Generar token
     const token = jwt.sign(
       { id: usuario.id, email: usuario.email, rol: usuario.rol },
       process.env.JWT_SECRET,
@@ -145,63 +106,29 @@ export const registrarFarmacia = async (req, res) => {
         id: usuario.id,
         nombre: usuario.nombre,
         email: usuario.email,
-        rol: usuario.rol,
-        telefono: usuario.telefono
+        rol: usuario.rol
       },
-      farmacia: {
-        id: farmacia.id,
-        nombre_farmacia: farmacia.nombre_farmacia,
-        direccion: farmacia.direccion,
-        ciudad: farmacia.ciudad,
-        estado: farmacia.estado,
-        telefono: farmacia.telefono,
-        numero_licencia: farmacia.numero_licencia
-      }
+      farmacia
     });
   } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al registrar farmacia',
-      error: error.message 
-    });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Login
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ 
-        mensaje: 'Email y contraseña son obligatorios',
-        error: 'LOGIN_MISSING_FIELDS'
-      });
-    }
-
     const usuario = await Usuario.findOne({ where: { email } });
     if (!usuario) {
-      return res.status(401).json({ 
-        mensaje: 'Credenciales inválidas',
-        error: 'LOGIN_INVALID_CREDENTIALS'
-      });
-    }
-
-    if (!usuario.activo) {
-      return res.status(401).json({ 
-        mensaje: 'Usuario desactivado',
-        error: 'LOGIN_USER_INACTIVE'
-      });
+      return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
 
     const passwordValida = await bcrypt.compare(password, usuario.password);
     if (!passwordValida) {
-      return res.status(401).json({ 
-        mensaje: 'Credenciales inválidas',
-        error: 'LOGIN_INVALID_CREDENTIALS'
-      });
+      return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
 
-    // Actualizar último login
     await usuario.update({ ultimo_login: new Date() });
 
     const token = jwt.sign(
@@ -210,13 +137,9 @@ export const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // Si es farmacia, obtener datos de la farmacia
     let datosFarmacia = null;
     if (usuario.rol === 'farmacia') {
-      datosFarmacia = await Farmacia.findOne({ 
-        where: { usuario_id: usuario.id },
-        attributes: { exclude: ['createdAt', 'updatedAt'] }
-      });
+      datosFarmacia = await Farmacia.findOne({ where: { usuario_id: usuario.id } });
     }
 
     res.json({
@@ -232,14 +155,10 @@ export const login = async (req, res) => {
       farmacia: datosFarmacia
     });
   } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al iniciar sesión',
-      error: error.message 
-    });
+    res.status(500).json({ error: error.message });
   }
 };
 
-// Obtener perfil del usuario autenticado
 export const obtenerPerfil = async (req, res) => {
   try {
     const usuario = await Usuario.findByPk(req.usuario.id, {
@@ -248,10 +167,7 @@ export const obtenerPerfil = async (req, res) => {
 
     let datosFarmacia = null;
     if (usuario.rol === 'farmacia') {
-      datosFarmacia = await Farmacia.findOne({ 
-        where: { usuario_id: usuario.id },
-        attributes: { exclude: ['createdAt', 'updatedAt'] }
-      });
+      datosFarmacia = await Farmacia.findOne({ where: { usuario_id: usuario.id } });
     }
 
     res.json({
@@ -259,9 +175,6 @@ export const obtenerPerfil = async (req, res) => {
       farmacia: datosFarmacia
     });
   } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al obtener perfil',
-      error: error.message 
-    });
+    res.status(500).json({ error: error.message });
   }
 };

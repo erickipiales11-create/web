@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import sequelize from '../config/databaser.js';
+import { sequelize } from '../config/database.js';
 
 const Usuario = sequelize.define('Usuario', {
   id: {
@@ -9,37 +9,21 @@ const Usuario = sequelize.define('Usuario', {
   },
   nombre: {
     type: DataTypes.STRING(255),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'El nombre es obligatorio' }
-    }
+    allowNull: false
   },
   email: {
     type: DataTypes.STRING(255),
     allowNull: false,
-    unique: {
-      msg: 'El email ya está registrado'
-    },
-    validate: {
-      isEmail: { msg: 'Email inválido' },
-      notEmpty: { msg: 'El email es obligatorio' }
-    }
+    unique: true
   },
   password: {
     type: DataTypes.STRING(255),
-    allowNull: false,
-    validate: {
-      notEmpty: { msg: 'La contraseña es obligatoria' },
-      len: {
-        args: [6, 255],
-        msg: 'La contraseña debe tener al menos 6 caracteres'
-      }
-    }
+    allowNull: false
   },
   rol: {
-  type: DataTypes.ENUM('usuario', 'farmacia', 'administrador', 'medico'),
-  defaultValue: 'usuario'
-},
+    type: DataTypes.ENUM('usuario', 'farmacia', 'administrador'),
+    defaultValue: 'usuario'
+  },
   telefono: {
     type: DataTypes.STRING(20),
     allowNull: true
