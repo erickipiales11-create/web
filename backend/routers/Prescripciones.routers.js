@@ -6,7 +6,7 @@ import {
   crearPrescripcion,
   actualizarPrescripcion,
   eliminarPrescripcion
-} from '../controllers/PrescripcionController.js';
+} from '../controllers/Prescripcioncontroller.js';
 
 const router = Router();
 

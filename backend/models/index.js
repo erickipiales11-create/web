@@ -1,14 +1,14 @@
-import sequelize from "../config/databaser.js";
-import User from "./User.js";
+import { sequelize } from "../config/database.js";
+import Usuario from "./Usuario.js";
 import Category from "./Category.js";
-import Farmacia from "./Pharmacy.js";
-import Medicamento from "./Medicine.js";
+import Farmacia from "./Farmacia.js";
+import Medicamento from "./Medicamento.js";
 import InventoryMovement from "./InventoryMovement.js";
 import Prescription from "./Prescription.js";
 
 // Usuario - Farmacia
-User.hasOne(Farmacia, { foreignKey: 'usuario_id' });
-Farmacia.belongsTo(User, { foreignKey: 'usuario_id' });
+Usuario.hasOne(Farmacia, { foreignKey: 'usuario_id' });
+Farmacia.belongsTo(Usuario, { foreignKey: 'usuario_id' });
 
 // Farmacia - Medicamento
 Farmacia.hasMany(Medicamento, { foreignKey: 'farmacia_id' });
@@ -22,11 +22,15 @@ Medicamento.belongsTo(Category, { foreignKey: 'category_id' });
 Medicamento.hasMany(InventoryMovement, { foreignKey: 'medicine_id' });
 InventoryMovement.belongsTo(Medicamento, { foreignKey: 'medicine_id' });
 
+// Prescription - InventoryMovement
+Prescription.hasMany(InventoryMovement, { foreignKey: 'prescription_id' });
+InventoryMovement.belongsTo(Prescription, { foreignKey: 'prescription_id' });
+
 // Usuario - Prescription (como paciente y como médico)
-User.hasMany(Prescription, { as: 'recetasComoPaciente', foreignKey: 'paciente_id' });
-Prescription.belongsTo(User, { as: 'paciente', foreignKey: 'paciente_id' });
+Usuario.hasMany(Prescription, { as: 'recetasComoPaciente', foreignKey: 'paciente_id' });
+Prescription.belongsTo(Usuario, { as: 'paciente', foreignKey: 'paciente_id' });
 
-User.hasMany(Prescription, { as: 'recetasComoMedico', foreignKey: 'medico_id' });
-Prescription.belongsTo(User, { as: 'medico', foreignKey: 'medico_id' });
+Usuario.hasMany(Prescription, { as: 'recetasComoMedico', foreignKey: 'medico_id' });
+Prescription.belongsTo(Usuario, { as: 'medico', foreignKey: 'medico_id' });
 
-export { sequelize, User, Category, Farmacia, Medicamento, InventoryMovement, Prescription };
+export { sequelize, Usuario, Category, Farmacia, Medicamento, InventoryMovement, Prescription };
