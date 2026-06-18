@@ -1,7 +1,14 @@
 import InventoryMovement from '../models/InventoryMovement.js';
 import Medicamento from '../models/Medicamento.js';
+import Farmacia from '../models/Farmacia.js';
 import Prescription from '../models/Prescription.js';
 import { sequelize } from '../config/database.js';
+
+// Helper: obtiene el farmacia_id a partir del usuario logueado
+const getFarmaciaId = async (usuarioId) => {
+  const farmacia = await Farmacia.findOne({ where: { usuario_id: usuarioId }, attributes: ['id'] });
+  return farmacia ? farmacia.id : null;
+};
 
 // GET /movimientos
 export const obtenerMovimientos = async (req, res) => {
@@ -11,9 +18,10 @@ export const obtenerMovimientos = async (req, res) => {
     let whereClause = {};
 
     if (rol === 'farmacia') {
-      // Obtener solo medicamentos de esta farmacia
+      const farmacia = await Farmacia.findOne({ where: { usuario_id: usuarioId }, attributes: ['id'] });
+      if (!farmacia) return res.status(404).json({ mensaje: 'Farmacia no encontrada', codigo: 'PHARMACY_NOT_FOUND' });
       const medicamentosDeLaFarmacia = await Medicamento.findAll({
-        where: { farmacia_id: usuarioId, activo: true },
+        where: { farmacia_id: farmacia.id, activo: true },
         attributes: ['id']
       });
       const ids = medicamentosDeLaFarmacia.map(m => m.id);
@@ -52,8 +60,11 @@ export const obtenerMovimientoPorId = async (req, res) => {
     }
 
     // Farmacia solo puede ver movimientos de sus propios medicamentos
-    if (rol === 'farmacia' && movimiento.Medicamento.farmacia_id !== usuarioId) {
-      return res.status(403).json({ mensaje: 'No tienes permiso para ver este movimiento', codigo: 'PERMISO_DENEGADO' });
+    if (rol === 'farmacia') {
+      const farmaciaId = await getFarmaciaId(usuarioId);
+      if (movimiento.Medicamento.farmacia_id !== farmaciaId) {
+        return res.status(403).json({ mensaje: 'No tienes permiso para ver este movimiento', codigo: 'PERMISO_DENEGADO' });
+      }
     }
 
     res.json({ mensaje: 'Movimiento obtenido ✅', movimiento });
@@ -91,9 +102,12 @@ export const crearMovimiento = async (req, res) => {
     }
 
     // Farmacia solo puede registrar movimientos de sus propios medicamentos
-    if (rol === 'farmacia' && medicamento.farmacia_id !== usuarioId) {
-      await t.rollback();
-      return res.status(403).json({ mensaje: 'No puedes registrar movimientos de medicamentos que no son tuyos', codigo: 'PERMISO_DENEGADO' });
+    if (rol === 'farmacia') {
+      const farmaciaId = await getFarmaciaId(usuarioId);
+      if (medicamento.farmacia_id !== farmaciaId) {
+        await t.rollback();
+        return res.status(403).json({ mensaje: 'No puedes registrar movimientos de medicamentos que no son tuyos', codigo: 'PERMISO_DENEGADO' });
+      }
     }
 
     if (tipo === 'salida') {
@@ -154,8 +168,11 @@ export const actualizarMovimiento = async (req, res) => {
       return res.status(400).json({ mensaje: 'No se puede editar un movimiento anulado', codigo: 'MOVIMIENTO_ANULADO' });
     }
 
-    if (rol === 'farmacia' && movimiento.Medicamento.farmacia_id !== usuarioId) {
-      return res.status(403).json({ mensaje: 'No puedes editar movimientos de medicamentos que no son tuyos', codigo: 'PERMISO_DENEGADO' });
+    if (rol === 'farmacia') {
+      const farmaciaId = await getFarmaciaId(usuarioId);
+      if (movimiento.Medicamento.farmacia_id !== farmaciaId) {
+        return res.status(403).json({ mensaje: 'No puedes editar movimientos de medicamentos que no son tuyos', codigo: 'PERMISO_DENEGADO' });
+      }
     }
 
     const CAMPOS_PERMITIDOS = ['observacion'];
@@ -192,8 +209,11 @@ export const anularMovimiento = async (req, res) => {
       return res.status(400).json({ mensaje: 'El movimiento ya está anulado', codigo: 'MOVIMIENTO_YA_ANULADO' });
     }
 
-    if (rol === 'farmacia' && movimiento.Medicamento.farmacia_id !== usuarioId) {
-      return res.status(403).json({ mensaje: 'No puedes anular movimientos de medicamentos que no son tuyos', codigo: 'PERMISO_DENEGADO' });
+    if (rol === 'farmacia') {
+      const farmaciaId = await getFarmaciaId(usuarioId);
+      if (movimiento.Medicamento.farmacia_id !== farmaciaId) {
+        return res.status(403).json({ mensaje: 'No puedes anular movimientos de medicamentos que no son tuyos', codigo: 'PERMISO_DENEGADO' });
+      }
     }
 
     await movimiento.update({ activo: false });
