@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../config/databaser.js";
+import { sequelize } from "../config/database.js";
 
 const Prescription = sequelize.define(
   "Prescription",

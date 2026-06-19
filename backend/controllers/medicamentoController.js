@@ -1,6 +1,6 @@
-import Medicamento from '../models/Medicine.js';
-import Farmacia from '../models/Pharmacy.js';
-import sequelize from '../config/databaser.js';
+import Medicamento from '../models/Medicamento.js';
+import Farmacia from '../models/Farmacia.js';
+import { sequelize } from '../config/database.js';
 import { Op } from 'sequelize';
 
 // Crear medicamento (solo farmacia)
@@ -282,7 +282,7 @@ export const actualizarStock = async (req, res) => {
     await medicamento.update({ cantidad });
     
     // Verificar si está por debajo del stock mínimo
-    const alertaStock = medicamento.cantidad <= medicamento.stock_minimo;
+    const alertaStock = cantidad <= medicamento.stock_minimo;
     
     res.json({ 
       mensaje: '✅ Stock actualizado exitosamente',

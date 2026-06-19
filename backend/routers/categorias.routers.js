@@ -6,7 +6,7 @@ import {
   crearCategoria,
   actualizarCategoria,
   eliminarCategoria
-} from '../controllers/CategoriaController.js';
+} from '../controllers/Categoriacontroller.js';
 
 const router = Router();
 
