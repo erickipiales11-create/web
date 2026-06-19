@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema Clínico - Farmacias</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+    <!-- ============ NAVBAR ============ -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🏥</span>
+                <span class="logo-text">Sistema Clínico</span>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="#" class="nav-link active" data-page="inicio">Inicio</a>
+                <a href="#" class="nav-link" data-page="farmacias">Farmacias</a>
+                <a href="#" class="nav-link" data-page="medicamentos">Medicamentos</a>
+                <a href="#" class="nav-link" data-page="registro-farmacia">Registrar Farmacia</a>
+            </div>
+            <div class="nav-auth" id="navAuth">
+                <button class="btn btn-outline" id="btnLogin">Iniciar Sesión</button>
+                <button class="btn btn-primary" id="btnRegister">Registrarse</button>
+            </div>
+            <div class="nav-user" id="navUser" style="display:none;">
+                <span class="user-name" id="userName">Usuario</span>
+                <button class="btn btn-danger btn-sm" id="btnLogout">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============ CONTENIDO PRINCIPAL ============ -->
+    <main class="main-content">
+        
+        <!-- Página Inicio -->
+        <section id="page-inicio" class="page active">
+            <div class="hero">
+                <h1>🏥 Sistema de Gestión de Farmacias</h1>
+                <p>Gestiona farmacias y medicamentos de manera eficiente.</p>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <h3 id="totalFarmacias">0</h3>
+                        <p>Farmacias</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="totalMedicamentos">0</h3>
+                        <p>Medicamentos</p>
+                    </div>
+                </div>
+            </div>
+            <div class="features">
+                <div class="feature-card">
+                    <span class="feature-icon">🏪</span>
+                    <h3>Gestiona Farmacias</h3>
+                    <p>Registra, actualiza y consulta farmacias fácilmente.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">💊</span>
+                    <h3>Administra Medicamentos</h3>
+                    <p>Controla stock, precios y fechas de vencimiento.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3>Reportes</h3>
+                    <p>Visualiza estadísticas y alertas de inventario.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Página Farmacias -->
+        <section id="page-farmacias" class="page">
+            <div class="page-header">
+                <h2>🏪 Farmacias</h2>
+                <button class="btn btn-primary" id="btnMostrarRegistroFarmacia">+ Nueva Farmacia</button>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchFarmacia" placeholder="Buscar farmacia por nombre o ciudad..." />
+                <button class="btn btn-primary" id="btnBuscarFarmacia">Buscar</button>
+            </div>
+            <div class="table-container" id="farmaciasContainer">
+                <div class="loading">Cargando farmacias...</div>
+            </div>
+        </section>
+
+        <!-- Página Medicamentos -->
+        <section id="page-medicamentos" class="page">
+            <div class="page-header">
+                <h2>💊 Medicamentos</h2>
+                <button class="btn btn-primary" id="btnMostrarRegistroMedicamento">+ Nuevo Medicamento</button>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchMedicamento" placeholder="Buscar medicamento por nombre..." />
+                <button class="btn btn-primary" id="btnBuscarMedicamento">Buscar</button>
+            </div>
+            <div class="table-container" id="medicamentosContainer">
+                <div class="loading">Cargando medicamentos...</div>
+            </div>
+        </section>
+
+        <!-- Página Registro Farmacia -->
+        <section id="page-registro-farmacia" class="page">
+            <div class="form-container">
+                <h2>📝 Registrar Nueva Farmacia</h2>
+                <form id="formRegistroFarmacia">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre del dueño</label>
+                            <input type="text" id="regNombre" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="regEmail" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Contraseña</label>
+                            <input type="password" id="regPassword" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="text" id="regTelefono" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre de la farmacia</label>
+                            <input type="text" id="regNombreFarmacia" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Número de licencia</label>
+                            <input type="text" id="regLicencia" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Dirección</label>
+                            <input type="text" id="regDireccion" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Ciudad</label>
+                            <input type="text" id="regCiudad" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Estado</label>
+                            <input type="text" id="regEstado" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono de farmacia</label>
+                            <input type="text" id="regTelefonoFarmacia" required />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Registrar Farmacia</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Modal Login -->
+        <div class="modal" id="modalLogin">
+            <div class="modal-content">
+                <span class="modal-close" id="closeLogin">&times;</span>
+                <h2>Iniciar Sesión</h2>
+                <form id="formLogin">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="loginPassword" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Registrar Usuario -->
+        <div class="modal" id="modalRegister">
+            <div class="modal-content">
+                <span class="modal-close" id="closeRegister">&times;</span>
+                <h2>Registrarse</h2>
+                <form id="formRegister">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="regUserNombre" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="regUserEmail" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <input type="password" id="regUserPassword" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Teléfono</label>
+                        <input type="text" id="regUserTelefono" />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Registro Medicamento (solo farmacia) -->
+        <div class="modal" id="modalMedicamento">
+            <div class="modal-content">
+                <span class="modal-close" id="closeMedicamento">&times;</span>
+                <h2>💊 Agregar Medicamento</h2>
+                <form id="formMedicamento">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="medNombre" required />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre Genérico</label>
+                            <input type="text" id="medGenerico" />
+                        </div>
+                        <div class="form-group">
+                            <label>Marca</label>
+                            <input type="text" id="medMarca" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cantidad</label>
+                            <input type="number" id="medCantidad" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Precio</label>
+                            <input type="number" step="0.01" id="medPrecio" required />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Número de Lote</label>
+                            <input type="text" id="medLote" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Caducidad</label>
+                            <input type="date" id="medCaducidad" required />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <input type="text" id="medCategoria" />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="medReceta" /> Requiere receta médica
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Agregar Medicamento</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer">
+        <p>&copy; 2024 Sistema Clínico - Todos los derechos reservados</p>
+        <p>Desarrollado para la gestión de farmacias</p>
+    </footer>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
