@@ -1,0 +1,42 @@
+<div class="container mt-4">
+  <h2>📋 Gestión de Prescripciones</h2>
+  
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="!loading && prescripciones.length === 0" class="alert alert-info">
+    No hay prescripciones registradas.
+  </div>
+
+  <div class="table-responsive" *ngIf="!loading && prescripciones.length > 0">
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Paciente</th>
+          <th>Medicamento ID</th>
+          <th>Dosis</th>
+          <th>Frecuencia</th>
+          <th>Médico</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let prescripcion of prescripciones">
+          <td>{{ prescripcion.id }}</td>
+          <td><strong>{{ prescripcion.paciente }}</strong></td>
+          <td>{{ prescripcion.medicamentoId }}</td>
+          <td>{{ prescripcion.dosis }}</td>
+          <td>{{ prescripcion.frecuencia }}</td>
+          <td>{{ prescripcion.medico }}</td>
+          <td>{{ prescripcion.fechaPrescripcion | date:'dd/MM/yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

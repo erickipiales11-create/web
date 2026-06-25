@@ -1,0 +1,95 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">{{ isEdit ? '✏️ Editar' : '➕ Nuevo' }} Medicamento</h5>
+        </div>
+        <div class="card-body">
+          <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+          <form (ngSubmit)="onSubmit()">
+            <div class="mb-3">
+              <label class="form-label">Nombre *</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="medicamento.nombre" 
+                name="nombre" 
+                required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Descripción</label>
+              <textarea 
+                class="form-control" 
+                [(ngModel)]="medicamento.descripcion" 
+                name="descripcion" 
+                rows="3"></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Precio *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="medicamento.precio" 
+                  name="precio" 
+                  required
+                  step="0.01">
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Stock *</label>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  [(ngModel)]="medicamento.stock" 
+                  name="stock" 
+                  required>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Categoría *</label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="medicamento.categoriaId" 
+                  name="categoriaId" 
+                  required>
+                  <option [value]="null">Seleccionar categoría...</option>
+                  <option *ngFor="let cat of categorias" [value]="cat.id">
+                    {{ cat.nombre }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Farmacia *</label>
+                <select 
+                  class="form-control" 
+                  [(ngModel)]="medicamento.farmaciaId" 
+                  name="farmaciaId" 
+                  required>
+                  <option [value]="null">Seleccionar farmacia...</option>
+                  <option *ngFor="let farm of farmacias" [value]="farm.id">
+                    {{ farm.nombre_farmacia }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+              <a routerLink="/medicamentos" class="btn btn-secondary">Cancelar</a>
+              <button type="submit" class="btn btn-primary" [disabled]="loading">
+                {{ loading ? 'Guardando...' : (isEdit ? 'Actualizar' : 'Guardar') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

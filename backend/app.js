@@ -13,6 +13,7 @@ import prescripcionesRoutes from './routers/Prescripciones.routers.js';
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -35,6 +36,11 @@ const sincronizarBaseDatos = async () => {
     console.log('✅ Conexión a la base de datos establecida');
     await sequelize.sync({ alter: false });
     console.log('✅ Modelos sincronizados');
+    
+    // INICIAR EL SERVIDOR
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   } catch (error) {
     console.error('❌ Error:', error);
   }

@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/database.js';
-import Farmacia from './Farmacia.js';
 
 const Medicamento = sequelize.define('Medicamento', {
   id: {
@@ -10,11 +9,7 @@ const Medicamento = sequelize.define('Medicamento', {
   },
   farmacia_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'farmacias',
-      key: 'id'
-    }
+    allowNull: false
   },
   nombre: {
     type: DataTypes.STRING(255),
@@ -35,6 +30,7 @@ const Medicamento = sequelize.define('Medicamento', {
   },
   unidad: {
     type: DataTypes.STRING(50),
+    allowNull: true,
     defaultValue: 'unidades'
   },
   precio: {
@@ -79,18 +75,22 @@ const Medicamento = sequelize.define('Medicamento', {
   },
   requiere_receta: {
     type: DataTypes.BOOLEAN,
+    allowNull: true,
     defaultValue: false
   },
   activo: {
     type: DataTypes.BOOLEAN,
+    allowNull: true,
     defaultValue: true
   },
   stock_minimo: {
     type: DataTypes.INTEGER,
+    allowNull: true,
     defaultValue: 5
   },
   stock_maximo: {
     type: DataTypes.INTEGER,
+    allowNull: true,
     defaultValue: 100
   },
   condiciones_almacenamiento: {
@@ -105,13 +105,20 @@ const Medicamento = sequelize.define('Medicamento', {
   url_imagen: {
     type: DataTypes.STRING(500),
     allowNull: true
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
   }
 }, {
   tableName: 'medicamentos',
   timestamps: true
 });
-
-Medicamento.belongsTo(Farmacia, { foreignKey: 'farmacia_id' });
-Farmacia.hasMany(Medicamento, { foreignKey: 'farmacia_id' });
 
 export default Medicamento;

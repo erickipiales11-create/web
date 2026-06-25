@@ -1,0 +1,51 @@
+<div class="container mt-4">
+  <h2>🏪 Gestión de Farmacias</h2>
+  
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="mb-3">
+    <a routerLink="/farmacias/nuevo" class="btn btn-primary">➕ Nueva Farmacia</a>
+  </div>
+
+  <div *ngIf="!loading && farmacias.length === 0" class="alert alert-info">
+    No hay farmacias registradas.
+  </div>
+
+  <div class="table-responsive" *ngIf="!loading && farmacias.length > 0">
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Dirección</th>
+          <th>Teléfono</th>
+          <th>Email</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let farmacia of farmacias">
+          <td>{{ farmacia.id }}</td>
+          <td><strong>{{ farmacia.nombre }}</strong></td>
+          <td>{{ farmacia.direccion }}</td>
+          <td>{{ farmacia.telefono }}</td>
+          <td>{{ farmacia.email }}</td>
+          <td>
+            <a [routerLink]="['/farmacias/editar', farmacia.id]" class="btn btn-sm btn-warning me-1">
+              ✏️ Editar
+            </a>
+            <button (click)="eliminarFarmacia(farmacia.id!)" class="btn btn-sm btn-danger">
+              🗑️ Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

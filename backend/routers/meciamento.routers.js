@@ -1,25 +1,19 @@
 import express from 'express';
-import {
-  crearMedicamento,
-  obtenerMedicamentosFarmacia,
-  obtenerTodosMedicamentos,
-  buscarMedicamentos,
-  actualizarMedicamento,
-  eliminarMedicamento,
-  actualizarStock,
-  obtenerMedicamentosPorVencer
+import { 
+  getMedicamentos, 
+  getMedicamento, 
+  createMedicamento, 
+  updateMedicamento, 
+  deleteMedicamento 
 } from '../controllers/medicamentoController.js';
-import { autenticar, autorizar } from '../middlewares/auth.js';
+import { autenticar } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-router.get('/', obtenerTodosMedicamentos);
-router.get('/buscar', buscarMedicamentos);
-router.post('/', autenticar, autorizar('farmacia'), crearMedicamento);
-router.get('/mis-medicamentos', autenticar, autorizar('farmacia'), obtenerMedicamentosFarmacia);
-router.get('/por-vencer', autenticar, autorizar('farmacia'), obtenerMedicamentosPorVencer);
-router.put('/:id', autenticar, autorizar('farmacia'), actualizarMedicamento);
-router.put('/:id/stock', autenticar, autorizar('farmacia'), actualizarStock);
-router.delete('/:id', autenticar, autorizar('farmacia'), eliminarMedicamento);
+router.get('/', autenticar, getMedicamentos);
+router.get('/:id', autenticar, getMedicamento);
+router.post('/', autenticar, createMedicamento);
+router.put('/:id', autenticar, updateMedicamento);
+router.delete('/:id', autenticar, deleteMedicamento);
 
 export default router;
