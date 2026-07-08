@@ -19,74 +19,10 @@ import {
     isFarmacia,
     getCurrentUser
 } from './auth.js';
-
-// ============================================
-// VARIABLES GLOBALES
-// ============================================
+import { showToast, abrirModal, cerrarModal } from './utils.js';
 
 let farmaciasData = [];
 let medicamentosData = [];
-
-// ============================================
-// TOAST NOTIFICATIONS
-// ============================================
-
-export const showToast = (message, type = 'info') => {
-    const container = document.getElementById('toastContainer') || crearToastContainer();
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100px)';
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
-};
-
-function crearToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-    return container;
-}
-
-// ============================================
-// NAVEGACIÓN
-// ============================================
-
-export function navegar(pagina) {
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(p => p.classList.remove('active'));
-    
-    const target = document.getElementById(`page-${pagina}`);
-    if (target) target.classList.add('active');
-    
-    // Actualizar links
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.toggle('active', link.dataset.page === pagina);
-    });
-}
-
-// ============================================
-// MODALES
-// ============================================
-
-export function abrirModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('active');
-}
-
-export function cerrarModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.remove('active');
-}
-
-// ============================================
-// CARGAR DATOS
-// ============================================
 
 export async function cargarFarmacias() {
     const container = document.getElementById('farmaciasContainer');
@@ -208,26 +144,19 @@ export async function cargarMedicamentos() {
     }
 }
 
-// ============================================
-// BUSCAR
-// ============================================
-
 export async function buscarMedicamentos(query) {
     const container = document.getElementById('medicamentosContainer');
     if (!query.trim()) {
         cargarMedicamentos();
         return;
     }
-    
     try {
         const result = await searchMedicamentos(query);
         const medicamentos = result.medicamentos || [];
-        
         if (medicamentos.length === 0) {
             container.innerHTML = `<div class="loading">No se encontraron medicamentos para "${query}"</div>`;
             return;
         }
-        
         let html = `
             <table>
                 <thead>
@@ -242,7 +171,6 @@ export async function buscarMedicamentos(query) {
                 </thead>
                 <tbody>
         `;
-        
         medicamentos.forEach(m => {
             html += `
                 <tr>
@@ -255,7 +183,6 @@ export async function buscarMedicamentos(query) {
                 </tr>
             `;
         });
-        
         html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
@@ -269,16 +196,13 @@ export async function buscarFarmacias(query) {
         cargarFarmacias();
         return;
     }
-    
     try {
         const result = await getFarmaciasByCity(query);
         const farmacias = result.farmacias || [];
-        
         if (farmacias.length === 0) {
             container.innerHTML = `<div class="loading">No se encontraron farmacias en "${query}"</div>`;
             return;
         }
-        
         let html = `
             <table>
                 <thead>
@@ -293,7 +217,6 @@ export async function buscarFarmacias(query) {
                 </thead>
                 <tbody>
         `;
-        
         farmacias.forEach(f => {
             html += `
                 <tr>
@@ -310,17 +233,12 @@ export async function buscarFarmacias(query) {
                 </tr>
             `;
         });
-        
         html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
         container.innerHTML = `<div class="loading" style="color: var(--danger);">❌ ${error.message}</div>`;
     }
 }
-
-// ============================================
-// CREAR MEDICAMENTO
-// ============================================
 
 export async function crearMedicamento(data) {
     try {
@@ -335,9 +253,15 @@ export async function crearMedicamento(data) {
     }
 }
 
-// ============================================
-// ELIMINAR MEDICAMENTO (global)
-// ============================================
+export function navegar(pagina) {
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(`page-${pagina}`);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.page === pagina);
+    });
+}
 
 window.eliminarMedicamento = async function(id) {
     if (!confirm('¿Estás seguro de desactivar este medicamento?')) return;
@@ -353,22 +277,15 @@ window.eliminarMedicamento = async function(id) {
 window.editarMedicamento = function(id) {
     const medicamento = medicamentosData.find(m => m.id === id);
     if (!medicamento) return;
-    
     showToast('🔧 Función de edición en desarrollo', 'info');
 };
 
-// ============================================
-// INICIALIZAR EVENTOS
-// ============================================
-
 document.addEventListener('DOMContentLoaded', () => {
-    // NAVEGACIÓN
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const page = link.dataset.page;
             navegar(page);
-            
             if (page === 'farmacias') cargarFarmacias();
             if (page === 'medicamentos') cargarMedicamentos();
             if (page === 'inicio') {
@@ -378,15 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // LOGIN
-    document.getElementById('btnLogin').addEventListener('click', () => {
-        abrirModal('modalLogin');
-    });
-
-    document.getElementById('closeLogin').addEventListener('click', () => {
-        cerrarModal('modalLogin');
-    });
-
+    document.getElementById('btnLogin').addEventListener('click', () => abrirModal('modalLogin'));
+    document.getElementById('closeLogin').addEventListener('click', () => cerrarModal('modalLogin'));
     document.getElementById('formLogin').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -395,15 +305,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('formLogin').reset();
     });
 
-    // REGISTRAR USUARIO
-    document.getElementById('btnRegister').addEventListener('click', () => {
-        abrirModal('modalRegister');
-    });
-
-    document.getElementById('closeRegister').addEventListener('click', () => {
-        cerrarModal('modalRegister');
-    });
-
+    document.getElementById('btnRegister').addEventListener('click', () => abrirModal('modalRegister'));
+    document.getElementById('closeRegister').addEventListener('click', () => cerrarModal('modalRegister'));
     document.getElementById('formRegister').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = {
@@ -416,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('formRegister').reset();
     });
 
-    // REGISTRAR FARMACIA
     document.getElementById('formRegistroFarmacia').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = {
@@ -437,7 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
         cargarFarmacias();
     });
 
-    // MEDICAMENTO - Modal
     document.getElementById('btnMostrarRegistroMedicamento').addEventListener('click', () => {
         if (!isAuthenticated()) {
             showToast('⚠️ Debes iniciar sesión como farmacia', 'warning');
@@ -451,10 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         abrirModal('modalMedicamento');
     });
 
-    document.getElementById('closeMedicamento').addEventListener('click', () => {
-        cerrarModal('modalMedicamento');
-    });
-
+    document.getElementById('closeMedicamento').addEventListener('click', () => cerrarModal('modalMedicamento'));
     document.getElementById('formMedicamento').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = {
@@ -472,49 +370,29 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('formMedicamento').reset();
     });
 
-    // BÚSQUEDAS
     document.getElementById('btnBuscarMedicamento').addEventListener('click', () => {
-        const query = document.getElementById('searchMedicamento').value;
-        buscarMedicamentos(query);
+        buscarMedicamentos(document.getElementById('searchMedicamento').value);
     });
-
     document.getElementById('searchMedicamento').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const query = document.getElementById('searchMedicamento').value;
-            buscarMedicamentos(query);
-        }
+        if (e.key === 'Enter') buscarMedicamentos(document.getElementById('searchMedicamento').value);
     });
 
     document.getElementById('btnBuscarFarmacia').addEventListener('click', () => {
-        const query = document.getElementById('searchFarmacia').value;
-        buscarFarmacias(query);
+        buscarFarmacias(document.getElementById('searchFarmacia').value);
     });
-
     document.getElementById('searchFarmacia').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            const query = document.getElementById('searchFarmacia').value;
-            buscarFarmacias(query);
-        }
+        if (e.key === 'Enter') buscarFarmacias(document.getElementById('searchFarmacia').value);
     });
 
-    // CERRAR SESIÓN
     document.getElementById('btnLogout').addEventListener('click', cerrarSesion);
+    document.getElementById('btnMostrarRegistroFarmacia').addEventListener('click', () => navegar('registro-farmacia'));
 
-    // MOSTRAR REGISTRO FARMACIA DESDE BOTÓN
-    document.getElementById('btnMostrarRegistroFarmacia').addEventListener('click', () => {
-        navegar('registro-farmacia');
-    });
-
-    // Cerrar modales al hacer clic fuera
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('active');
-            }
+            if (e.target === modal) modal.classList.remove('active');
         });
     });
 
-    // INICIALIZAR
     actualizarUIUsuario();
     cargarFarmacias();
     cargarMedicamentos();

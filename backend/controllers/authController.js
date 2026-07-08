@@ -30,7 +30,7 @@ export const registrar = async (req, res) => {
 
     res.status(201).json({
       token,
-      user: {
+      usuario: {
         id: usuario.id,
         nombre: usuario.nombre,
         email: usuario.email,
@@ -81,7 +81,7 @@ export const registrarFarmacia = async (req, res) => {
 
     res.status(201).json({
       token,
-      user: {
+      usuario: {
         id: usuario.id,
         nombre: usuario.nombre,
         email: usuario.email,
@@ -112,13 +112,13 @@ export const login = async (req, res) => {
         process.env.JWT_SECRET || 'mi_secreto_super_seguro_123',
         { expiresIn: '24h' }
       );
-      return res.json({ 
-        token, 
-        user: { 
-          id: usuario.id, 
-          nombre: usuario.nombre, 
+      return res.json({
+        token,
+        usuario: {
+          id: usuario.id,
+          nombre: usuario.nombre,
           email: usuario.email,
-          rol: usuario.rol 
+          rol: usuario.rol
         } 
       });
     }
@@ -137,12 +137,12 @@ export const login = async (req, res) => {
     
     res.json({ 
       token, 
-      user: { 
+      usuario: { 
         id: usuario.id, 
         nombre: usuario.nombre, 
         email: usuario.email,
         rol: usuario.rol 
-      } 
+      }
     });
 
   } catch (error) {

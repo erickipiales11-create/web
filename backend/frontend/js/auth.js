@@ -2,30 +2,23 @@ import {
     login as apiLogin, 
     register as apiRegister, 
     registerPharmacy as apiRegisterPharmacy,
+    getToken,
     setToken, 
     removeToken, 
     setUsuario, 
     removeUsuario,
     getUsuario 
 } from './api.js';
-import { showToast } from './app.js';
+import { showToast, cerrarModal } from './utils.js';
 
-// ============================================
-// FUNCIONES DE AUTENTICACIÓN
-// ============================================
-
-// Iniciar sesión
 export const iniciarSesion = async (email, password) => {
     try {
         const result = await apiLogin(email, password);
-        
         setToken(result.token);
         setUsuario(result.usuario);
-        
         showToast('✅ ' + result.mensaje, 'success');
         actualizarUIUsuario();
         cerrarModal('modalLogin');
-        
         return result;
     } catch (error) {
         showToast('❌ ' + error.message, 'error');
@@ -33,7 +26,6 @@ export const iniciarSesion = async (email, password) => {
     }
 };
 
-// Registrar usuario
 export const registrarUsuario = async (data) => {
     try {
         const result = await apiRegister(data);
@@ -46,7 +38,6 @@ export const registrarUsuario = async (data) => {
     }
 };
 
-// Registrar farmacia
 export const registrarFarmacia = async (data) => {
     try {
         const result = await apiRegisterPharmacy(data);
@@ -58,7 +49,6 @@ export const registrarFarmacia = async (data) => {
     }
 };
 
-// Cerrar sesión
 export const cerrarSesion = () => {
     removeToken();
     removeUsuario();
@@ -66,25 +56,18 @@ export const cerrarSesion = () => {
     showToast('✅ Sesión cerrada correctamente', 'info');
 };
 
-// Verificar si el usuario está autenticado
 export const isAuthenticated = () => {
     return !!getToken();
 };
 
-// Obtener usuario actual
 export const getCurrentUser = () => {
     return getUsuario();
 };
 
-// Verificar si es farmacia
 export const isFarmacia = () => {
     const user = getCurrentUser();
     return user && user.rol === 'farmacia';
 };
-
-// ============================================
-// ACTUALIZAR UI SEGÚN AUTENTICACIÓN
-// ============================================
 
 export const actualizarUIUsuario = () => {
     const navAuth = document.getElementById('navAuth');
@@ -96,8 +79,6 @@ export const actualizarUIUsuario = () => {
         navAuth.style.display = 'none';
         navUser.style.display = 'flex';
         userName.textContent = user.nombre || user.email;
-        
-        // Mostrar/ocultar opciones según rol
         const navLinks = document.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
             const page = link.dataset.page;
