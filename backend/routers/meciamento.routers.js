@@ -1,17 +1,20 @@
 import express from 'express';
-import { 
-  getMedicamentos, 
-  getMedicamento, 
-  createMedicamento, 
-  updateMedicamento, 
-  deleteMedicamento 
+import {
+    getMedicamentos,
+    getMedicamento,
+    createMedicamento,
+    updateMedicamento,
+    deleteMedicamento
 } from '../controllers/medicamentoController.js';
 import { autenticar } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-router.get('/', autenticar, getMedicamentos);
-router.get('/:id', autenticar, getMedicamento);
+// Rutas públicas (sin autenticación)
+router.get('/', getMedicamentos);
+router.get('/:id', getMedicamento);
+
+// Rutas protegidas (requieren autenticación)
 router.post('/', autenticar, createMedicamento);
 router.put('/:id', autenticar, updateMedicamento);
 router.delete('/:id', autenticar, deleteMedicamento);
