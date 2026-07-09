@@ -2,7 +2,7 @@
 // CONFIGURACIÓN DE LA API
 // ============================================
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://web-production-8274.up.railway.app/api';
 
 // Obtener token del localStorage
 export const getToken = () => localStorage.getItem('token');
