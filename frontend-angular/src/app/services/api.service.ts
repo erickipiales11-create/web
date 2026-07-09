@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'https://web-production-8274.up.railway.app/api';
 
   constructor(private http: HttpClient) { }
 
