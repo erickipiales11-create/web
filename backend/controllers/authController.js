@@ -46,7 +46,7 @@ export const registrar = async (req, res) => {
 // Registrar farmacia
 export const registrarFarmacia = async (req, res) => {
   try {
-    const { nombre, direccion, telefono, email, password } = req.body;
+    const { nombre, email, password } = req.body;
     
     const usuarioExistente = await Usuario.findOne({ where: { email } });
     if (usuarioExistente) {
@@ -56,7 +56,6 @@ export const registrarFarmacia = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Crear usuario con rol farmacia
     const usuario = await Usuario.create({
       nombre,
       email,
@@ -64,13 +63,15 @@ export const registrarFarmacia = async (req, res) => {
       rol: 'farmacia'
     });
 
-    // Crear farmacia asociada al usuario
     const farmacia = await Farmacia.create({
-      nombre,
-      direccion,
-      telefono,
-      email,
-      usuarioId: usuario.id
+      nombre_farmacia: req.body.nombre_farmacia,
+      direccion: req.body.direccion,
+      ciudad: req.body.ciudad,
+      estado: req.body.estado,
+      telefono: req.body.telefono_farmacia,
+      numero_licencia: req.body.numero_licencia,
+      usuario_id: usuario.id,
+      activo: true
     });
 
     const token = jwt.sign(
@@ -105,7 +106,6 @@ export const login = async (req, res) => {
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
     }
 
-    // 🔥 TEMPORAL: Aceptar 'admin123' como contraseña mágica
     if (password === 'admin123') {
       const token = jwt.sign(
         { id: usuario.id, email: usuario.email, rol: usuario.rol },
@@ -123,7 +123,6 @@ export const login = async (req, res) => {
       });
     }
 
-    // Verificar contraseña con bcrypt
     const passwordValida = await bcrypt.compare(password, usuario.password);
     if (!passwordValida) {
       return res.status(401).json({ mensaje: 'Credenciales inválidas' });
@@ -159,7 +158,7 @@ export const obtenerPerfil = async (req, res) => {
       include: [{
         model: Farmacia,
         as: 'farmacia',
-        attributes: ['id', 'nombre', 'direccion', 'telefono']
+        attributes: ['id', 'nombre_farmacia', 'direccion', 'telefono']
       }]
     });
     
