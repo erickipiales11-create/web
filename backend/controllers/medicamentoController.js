@@ -1,11 +1,26 @@
 import Medicamento from '../models/Medicamento.js';
+import { Op } from 'sequelize';
 
 export const getMedicamentos = async (req, res) => {
   try {
     const medicamentos = await Medicamento.findAll();
-    res.json(medicamentos);
+    res.json({ medicamentos });
   } catch (error) {
     console.error('Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const buscarMedicamentos = async (req, res) => {
+  try {
+    const { query } = req.query;
+    const medicamentos = await Medicamento.findAll({
+      where: {
+        nombre: { [Op.iLike]: `%${query}%` }
+      }
+    });
+    res.json({ medicamentos });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
