@@ -1,21 +1,18 @@
-import express from 'express';
-import {
-    getMedicamentos,
-    getMedicamento,
-    buscarMedicamentos,
-    createMedicamento,
-    updateMedicamento,
-    deleteMedicamento
-} from '../controllers/medicamentoController.js';
-import { autenticar } from '../middlewares/auth.js';
-
+const express = require('express');
 const router = express.Router();
+const medicineController = require('../controllers/medicineController');
+const { auth, checkRole } = require('../middleware/auth');
 
-router.get('/', getMedicamentos);
-router.get('/buscar', buscarMedicamentos);
-router.get('/:id', getMedicamento);
-router.post('/', autenticar, createMedicamento);
-router.put('/:id', autenticar, updateMedicamento);
-router.delete('/:id', autenticar, deleteMedicamento);
+// Todas las rutas requieren autenticación
+router.use(auth);
 
-export default router;
+// Rutas públicas (para todos los usuarios autenticados)
+router.get('/', medicineController.getAllMedicines);
+router.get('/:id', medicineController.getMedicineById);
+
+// Rutas para workers y admin
+router.post('/', checkRole('admin', 'worker'), medicineController.createMedicine);
+router.put('/:id', checkRole('admin', 'worker'), medicineController.updateMedicine);
+router.delete('/:id', checkRole('admin', 'worker'), medicineController.deleteMedicine);
+
+module.exports = router;

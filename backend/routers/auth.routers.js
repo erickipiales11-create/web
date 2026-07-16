@@ -1,17 +1,11 @@
-import express from "express";
-import { 
-  registrar, 
-  registrarFarmacia, 
-  login, 
-  obtenerPerfil 
-} from "../controllers/authController.js";
-import { autenticar } from "../middlewares/auth.js";
-
+const express = require('express');
 const router = express.Router();
+const authController = require('../controllers/authController');
+const { auth } = require('../middleware/auth');
 
-router.post("/registrar", registrar);
-router.post("/registrar-farmacia", registrarFarmacia);
-router.post("/login", login);
-router.get("/perfil", autenticar, obtenerPerfil);
+router.post('/register', auth, authController.register);
+router.post('/login', authController.login);
+router.get('/me', auth, authController.me);
+router.get('/validate', auth, authController.validateToken);
 
-export default router;
+module.exports = router;

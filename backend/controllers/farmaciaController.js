@@ -1,172 +1,134 @@
-import Farmacia from '../models/Farmacia.js';
-import Usuario from '../models/Usuario.js';
-import { Op } from 'sequelize';
+const { Pharmacy, User } = require('../models');
 
-// Obtener todas las farmacias (público)
-export const obtenerTodasFarmacias = async (req, res) => {
-  try {
-    const farmacias = await Farmacia.findAll({
-      include: [{
-        model: Usuario,
-        attributes: ['id', 'nombre', 'email', 'telefono']
-      }],
-      where: { activo: true },
-      order: [['nombre_farmacia', 'ASC']]
-    });
-    res.json({
-      total: farmacias.length,
-      farmacias
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al obtener farmacias',
-      error: error.message 
-    });
-  }
+exports.getAllPharmacies = async (req, res) => {
+    try {
+        const pharmacies = await Pharmacy.findAll({
+            where: { is_active: true },
+            include: [{
+                model: User,
+                as: 'workers',
+                attributes: ['id', 'name', 'email'],
+                where: { role: 'worker' },
+                required: false,
+            }],
+        });
+        res.json(pharmacies);
+    } catch (error) {
+        console.error('Error al obtener farmacias:', error);
+        res.status(500).json({ error: 'Error al obtener farmacias' });
+    }
 };
 
-// Obtener una farmacia por ID
-export const obtenerFarmaciaPorId = async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({
-        mensaje: 'ID inválido',
-        error: 'INVALID_ID'
-      });
+exports.getPharmacyById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const pharmacy = await Pharmacy.findByPk(id, {
+            include: [{
+                model: User,
+                as: 'workers',
+                attributes: ['id', 'name', 'email'],
+                where: { role: 'worker' },
+                required: false,
+            }],
+        });
+        
+        if (!pharmacy) {
+            return res.status(404).json({ error: 'Farmacia no encontrada' });
+        }
+        
+        res.json(pharmacy);
+    } catch (error) {
+        console.error('Error al obtener farmacia:', error);
+        res.status(500).json({ error: 'Error al obtener farmacia' });
     }
-
-    const farmacia = await Farmacia.findByPk(id, {
-      include: [{
-        model: Usuario,
-        attributes: ['id', 'nombre', 'email', 'telefono']
-      }]
-    });
-
-    if (!farmacia) {
-      return res.status(404).json({ 
-        mensaje: 'Farmacia no encontrada',
-        error: 'PHARMACY_NOT_FOUND'
-      });
-    }
-
-    res.json(farmacia);
-  } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al obtener farmacia',
-      error: error.message 
-    });
-  }
 };
 
-// Actualizar farmacia (solo el dueño)
-export const actualizarFarmacia = async (req, res) => {
-  try {
-    const farmacia = await Farmacia.findOne({
-      where: { usuario_id: req.usuario.id }
-    });
+exports.createPharmacy = async (req, res) => {
+    try {
+        const { name, address, phone, latitude, longitude } = req.body;
 
-    if (!farmacia) {
-      return res.status(404).json({ 
-        mensaje: 'Farmacia no encontrada',
-        error: 'PHARMACY_NOT_FOUND'
-      });
+        const pharmacy = await Pharmacy.create({
+            name,
+            address,
+            phone,
+            latitude,
+            longitude,
+        });
+
+        res.status(201).json(pharmacy);
+    } catch (error) {
+        console.error('Error al crear farmacia:', error);
+        res.status(500).json({ error: 'Error al crear farmacia' });
     }
-
-    // Campos permitidos para actualizar
-    const camposPermitidos = [
-      'nombre_farmacia', 'direccion', 'ciudad', 'estado',
-      'telefono', 'email', 'sitio_web', 'horario',
-      'latitud', 'longitud'
-    ];
-
-    const datosActualizar = {};
-    camposPermitidos.forEach(campo => {
-      if (req.body[campo] !== undefined) {
-        datosActualizar[campo] = req.body[campo];
-      }
-    });
-
-    await farmacia.update(datosActualizar);
-    
-    res.json({ 
-      mensaje: '✅ Farmacia actualizada exitosamente', 
-      farmacia 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al actualizar farmacia',
-      error: error.message 
-    });
-  }
 };
 
-// Buscar farmacias por ciudad
-export const obtenerFarmaciasPorCiudad = async (req, res) => {
-  try {
-    const { ciudad } = req.params;
-    const farmacias = await Farmacia.findAll({
-      where: {
-        ciudad: {
-          [Op.iLike]: `%${ciudad}%`
-        },
-        activo: true
-      },
-      include: [{
-        model: Usuario,
-        attributes: ['id', 'nombre', 'email', 'telefono']
-      }]
-    });
-    
-    res.json({
-      ciudad: ciudad,
-      total: farmacias.length,
-      farmacias
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al buscar farmacias',
-      error: error.message 
-    });
-  }
+exports.updatePharmacy = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, address, phone, latitude, longitude } = req.body;
+
+        const pharmacy = await Pharmacy.findByPk(id);
+        if (!pharmacy) {
+            return res.status(404).json({ error: 'Farmacia no encontrada' });
+        }
+
+        await pharmacy.update({
+            name,
+            address,
+            phone,
+            latitude,
+            longitude,
+        });
+
+        res.json(pharmacy);
+    } catch (error) {
+        console.error('Error al actualizar farmacia:', error);
+        res.status(500).json({ error: 'Error al actualizar farmacia' });
+    }
 };
 
-// Buscar farmacias por nombre
-export const buscarFarmacias = async (req, res) => {
-  try {
-    const { query } = req.query;
+exports.deletePharmacy = async (req, res) => {
+    try {
+        const { id } = req.params;
 
-    if (!query) {
-      return res.status(400).json({
-        mensaje: 'Se requiere un término de búsqueda',
-        error: 'SEARCH_QUERY_REQUIRED'
-      });
+        const pharmacy = await Pharmacy.findByPk(id);
+        if (!pharmacy) {
+            return res.status(404).json({ error: 'Farmacia no encontrada' });
+        }
+
+        // Soft delete
+        await pharmacy.update({ is_active: false });
+
+        res.json({ message: 'Farmacia eliminada correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar farmacia:', error);
+        res.status(500).json({ error: 'Error al eliminar farmacia' });
     }
+};
 
-    const farmacias = await Farmacia.findAll({
-      where: {
-        [Op.or]: [
-          { nombre_farmacia: { [Op.iLike]: `%${query}%` } },
-          { direccion: { [Op.iLike]: `%${query}%` } },
-          { ciudad: { [Op.iLike]: `%${query}%` } }
-        ],
-        activo: true
-      },
-      include: [{
-        model: Usuario,
-        attributes: ['id', 'nombre', 'email', 'telefono']
-      }]
-    });
-    
-    res.json({
-      busqueda: query,
-      total: farmacias.length,
-      farmacias
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      mensaje: 'Error al buscar farmacias',
-      error: error.message 
-    });
-  }
+exports.assignWorker = async (req, res) => {
+    try {
+        const { userId, pharmacyId } = req.body;
+
+        const user = await User.findByPk(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        if (user.role !== 'worker') {
+            return res.status(400).json({ error: 'El usuario debe ser un trabajador' });
+        }
+
+        const pharmacy = await Pharmacy.findByPk(pharmacyId);
+        if (!pharmacy) {
+            return res.status(404).json({ error: 'Farmacia no encontrada' });
+        }
+
+        await user.update({ pharmacy_id: pharmacyId });
+
+        res.json({ message: 'Trabajador asignado correctamente', user });
+    } catch (error) {
+        console.error('Error al asignar trabajador:', error);
+        res.status(500).json({ error: 'Error al asignar trabajador' });
+    }
 };

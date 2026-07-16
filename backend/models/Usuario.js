@@ -1,44 +1,67 @@
-import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/database.js';
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
+const bcrypt = require('bcryptjs');
 
-const Usuario = sequelize.define('Usuario', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  nombre: {
-    type: DataTypes.STRING(255),
-    allowNull: false
-  },
-  email: {
-    type: DataTypes.STRING(255),
-    allowNull: false,
-    unique: true
-  },
-  password: {
-    type: DataTypes.STRING(255),
-    allowNull: false
-  },
-  rol: {
-    type: DataTypes.ENUM('usuario', 'farmacia', 'administrador', 'paciente', 'medico'),
-    defaultValue: 'usuario'
-  },
-  telefono: {
-    type: DataTypes.STRING(20),
-    allowNull: true
-  },
-  activo: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true
-  },
-  ultimo_login: {
-    type: DataTypes.DATE,
-    allowNull: true
-  }
+const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+    },
+    email: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        unique: true,
+        validate: {
+            isEmail: true,
+        },
+    },
+    password: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+    },
+    name: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+    },
+    role: {
+        type: DataTypes.ENUM('admin', 'worker', 'patient'),
+        allowNull: false,
+        defaultValue: 'patient',
+    },
+    pharmacy_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'pharmacies',
+            key: 'id',
+        },
+    },
+    is_active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+    },
 }, {
-  tableName: 'usuarios',
-  timestamps: true
+    tableName: 'users',
+    timestamps: true,
+    hooks: {
+        beforeCreate: async (user) => {
+            if (user.password) {
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(user.password, salt);
+            }
+        },
+        beforeUpdate: async (user) => {
+            if (user.changed('password')) {
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(user.password, salt);
+            }
+        },
+    },
 });
 
-export default Usuario;
+User.prototype.comparePassword = async function(password) {
+    return await bcrypt.compare(password, this.password);
+};
+
+module.exports = User;

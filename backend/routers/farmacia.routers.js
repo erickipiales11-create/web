@@ -1,17 +1,19 @@
-import express from 'express';
-import {
-  obtenerTodasFarmacias,
-  obtenerFarmaciaPorId,
-  actualizarFarmacia,
-  obtenerFarmaciasPorCiudad
-} from '../controllers/farmaciaController.js';
-import { autenticar, autorizar } from '../middlewares/auth.js';
-
+const express = require('express');
 const router = express.Router();
+const pharmacyController = require('../controllers/pharmacyController');
+const { auth, checkRole } = require('../middleware/auth');
 
-router.get('/', obtenerTodasFarmacias);
-router.get('/ciudad/:ciudad', obtenerFarmaciasPorCiudad);
-router.get('/:id', obtenerFarmaciaPorId);
-router.put('/actualizar', autenticar, autorizar('farmacia'), actualizarFarmacia);
+// Todas las rutas requieren autenticación
+router.use(auth);
 
-export default router;
+// Rutas públicas (para todos los usuarios autenticados)
+router.get('/', pharmacyController.getAllPharmacies);
+router.get('/:id', pharmacyController.getPharmacyById);
+
+// Rutas solo para admin
+router.post('/', checkRole('admin'), pharmacyController.createPharmacy);
+router.put('/:id', checkRole('admin'), pharmacyController.updatePharmacy);
+router.delete('/:id', checkRole('admin'), pharmacyController.deletePharmacy);
+router.post('/assign-worker', checkRole('admin'), pharmacyController.assignWorker);
+
+module.exports = router;

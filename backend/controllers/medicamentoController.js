@@ -1,82 +1,157 @@
-import Medicamento from '../models/Medicamento.js';
-import { Op } from 'sequelize';
+const { Medicine, Category, Pharmacy, sequelize } = require('../models');
 
-export const getMedicamentos = async (req, res) => {
-  try {
-    const medicamentos = await Medicamento.findAll();
-    res.json({ medicamentos });
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
+exports.getAllMedicines = async (req, res) => {
+    try {
+        const { pharmacy_id, category_id, search } = req.query;
+        
+        const where = { is_active: true };
+        if (pharmacy_id) where.pharmacy_id = pharmacy_id;
+        if (category_id) where.category_id = category_id;
+        
+        let medicines = await Medicine.findAll({
+            where,
+            include: [
+                { model: Category, attributes: ['id', 'name'] },
+                { model: Pharmacy, attributes: ['id', 'name'] },
+            ],
+            order: [['name', 'ASC']],
+        });
 
-export const buscarMedicamentos = async (req, res) => {
-  try {
-    const { query } = req.query;
-    const medicamentos = await Medicamento.findAll({
-      where: {
-        nombre: { [Op.iLike]: `%${query}%` }
-      }
-    });
-    res.json({ medicamentos });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+        // Búsqueda por nombre o componente activo
+        if (search) {
+            medicines = medicines.filter(m => 
+                m.name.toLowerCase().includes(search.toLowerCase()) ||
+                (m.active_ingredient && m.active_ingredient.toLowerCase().includes(search.toLowerCase()))
+            );
+        }
 
-export const getMedicamento = async (req, res) => {
-  try {
-    const medicamento = await Medicamento.findByPk(req.params.id);
-    if (!medicamento) {
-      return res.status(404).json({ mensaje: 'No encontrado' });
+        res.json(medicines);
+    } catch (error) {
+        console.error('Error al obtener medicamentos:', error);
+        res.status(500).json({ error: 'Error al obtener medicamentos' });
     }
-    res.json(medicamento);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 };
 
-export const createMedicamento = async (req, res) => {
-  try {
-    const medicamento = await Medicamento.create({
-      farmacia_id: req.body.farmacia_id || 1,
-      nombre: req.body.nombre || 'Sin nombre',
-      cantidad: parseInt(req.body.cantidad) || 0,
-      precio: parseFloat(req.body.precio) || 0,
-      categoria: req.body.categoria || 'General',
-      numero_lote: req.body.numero_lote || 'LOTE-' + Date.now(),
-      fecha_caducidad: req.body.fecha_caducidad || '2026-12-31'
-    });
-    res.status(201).json(medicamento);
-  } catch (error) {
-    console.error('Error:', error);
-    res.status(500).json({ error: error.message });
-  }
-};
+exports.getMedicineById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const medicine = await Medicine.findByPk(id, {
+            include: [
+                { model: Category, attributes: ['id', 'name'] },
+                { model: Pharmacy, attributes: ['id', 'name'] },
+            ],
+        });
 
-export const updateMedicamento = async (req, res) => {
-  try {
-    const medicamento = await Medicamento.findByPk(req.params.id);
-    if (!medicamento) {
-      return res.status(404).json({ mensaje: 'No encontrado' });
+        if (!medicine) {
+            return res.status(404).json({ error: 'Medicamento no encontrado' });
+        }
+
+        // Buscar medicamentos equivalentes (mismo componente activo)
+        const equivalents = await Medicine.findAll({
+            where: {
+                active_ingredient: medicine.active_ingredient,
+                is_active: true,
+                id: { [sequelize.Op.ne]: medicine.id },
+            },
+            attributes: ['id', 'name', 'gramaje', 'price'],
+        });
+
+        res.json({ ...medicine.toJSON(), equivalents });
+    } catch (error) {
+        console.error('Error al obtener medicamento:', error);
+        res.status(500).json({ error: 'Error al obtener medicamento' });
     }
-    await medicamento.update(req.body);
-    res.json(medicamento);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 };
 
-export const deleteMedicamento = async (req, res) => {
-  try {
-    const medicamento = await Medicamento.findByPk(req.params.id);
-    if (!medicamento) {
-      return res.status(404).json({ mensaje: 'No encontrado' });
+exports.createMedicine = async (req, res) => {
+    try {
+        const {
+            name,
+            category_id,
+            description,
+            price,
+            stock,
+            requires_prescription,
+            gramaje,
+            tipo,
+            pharmacy_id,
+            expiration_date,
+            active_ingredient,
+            laboratory,
+        } = req.body;
+
+        // Verificar que el trabajador solo pueda agregar a su farmacia
+        if (req.user.role === 'worker' && req.user.pharmacy_id !== parseInt(pharmacy_id)) {
+            return res.status(403).json({ error: 'No puedes agregar medicamentos a otra farmacia' });
+        }
+
+        const medicine = await Medicine.create({
+            name,
+            category_id,
+            description,
+            price,
+            stock,
+            requires_prescription: requires_prescription || false,
+            gramaje,
+            tipo,
+            pharmacy_id,
+            expiration_date,
+            active_ingredient,
+            laboratory,
+        });
+
+        res.status(201).json(medicine);
+    } catch (error) {
+        console.error('Error al crear medicamento:', error);
+        res.status(500).json({ error: 'Error al crear medicamento' });
     }
-    await medicamento.destroy();
-    res.json({ mensaje: 'Eliminado' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+};
+
+exports.updateMedicine = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+
+        const medicine = await Medicine.findByPk(id);
+        if (!medicine) {
+            return res.status(404).json({ error: 'Medicamento no encontrado' });
+        }
+
+        // Verificar permisos
+        if (req.user.role === 'worker') {
+            if (medicine.pharmacy_id !== req.user.pharmacy_id) {
+                return res.status(403).json({ error: 'No puedes editar medicamentos de otra farmacia' });
+            }
+            // Worker no puede cambiar la farmacia
+            delete updates.pharmacy_id;
+        }
+
+        await medicine.update(updates);
+        res.json(medicine);
+    } catch (error) {
+        console.error('Error al actualizar medicamento:', error);
+        res.status(500).json({ error: 'Error al actualizar medicamento' });
+    }
+};
+
+exports.deleteMedicine = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const medicine = await Medicine.findByPk(id);
+        if (!medicine) {
+            return res.status(404).json({ error: 'Medicamento no encontrado' });
+        }
+
+        // Verificar permisos
+        if (req.user.role === 'worker' && medicine.pharmacy_id !== req.user.pharmacy_id) {
+            return res.status(403).json({ error: 'No puedes eliminar medicamentos de otra farmacia' });
+        }
+
+        await medicine.update({ is_active: false });
+        res.json({ message: 'Medicamento eliminado correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar medicamento:', error);
+        res.status(500).json({ error: 'Error al eliminar medicamento' });
+    }
 };
